@@ -31,12 +31,15 @@ class _ProductItemState extends State<ProductItem> {
               arguments: product.id,
             );
           },
-          child: FadeInImage( //todo 1 (finish)
-            placeholder: AssetImage('assets/images/product-placeholder.png'),
-            image: NetworkImage(
-              product.imageUrl,
+          child: Hero(  //todo 1 (next product_details_screen)
+            tag: product.id,
+            child: FadeInImage(
+              placeholder: AssetImage('assets/images/product-placeholder.png'),
+              image: NetworkImage(
+                product.imageUrl,
+              ),
+              fit: BoxFit.fill,
             ),
-            fit: BoxFit.fill,
           ),
         ),
         footer: GridTileBar(

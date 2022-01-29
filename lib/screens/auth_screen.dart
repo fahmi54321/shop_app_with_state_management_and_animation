@@ -94,7 +94,8 @@ class AuthCard extends StatefulWidget {
   _AuthCardState createState() => _AuthCardState();
 }
 
-class _AuthCardState extends State<AuthCard> with SingleTickerProviderStateMixin {
+class _AuthCardState extends State<AuthCard>
+    with SingleTickerProviderStateMixin {
   final GlobalKey<FormState> _formKey = GlobalKey();
   AuthMode _authMode = AuthMode.Login;
   Map<String, String> _authData = {
@@ -104,39 +105,38 @@ class _AuthCardState extends State<AuthCard> with SingleTickerProviderStateMixin
   var _isLoading = false;
   final _passwordController = TextEditingController();
 
-  //animation //todo 1
-  late AnimationController _controller; //todo 2
-  late Animation<Size> _heightAnimation; //todo 3
+  // //animation
+  // late AnimationController _controller;
+  // late Animation<Size> _heightAnimation;
+  //
+  // @override
+  // void initState() {
+  //   super.initState();
+  //
+  //   _controller = AnimationController(
+  //     vsync: this,
+  //     duration: Duration(milliseconds: 300),
+  //   );
+  //
+  //   _heightAnimation = Tween<Size>(
+  //     begin: Size(double.infinity, 260),
+  //     end: Size(
+  //       double.infinity,
+  //       320,
+  //     ),
+  //   ).animate(
+  //     CurvedAnimation(
+  //       parent: _controller,
+  //       curve: Curves.fastOutSlowIn,
+  //     ),
+  //   );
+  // }
 
-  @override
-  void initState() {
-    super.initState();
-
-    _controller = AnimationController( //todo 4
-      vsync: this,
-      duration: Duration(milliseconds: 300),
-    );
-
-    _heightAnimation = Tween<Size>( //todo 5
-      begin: Size(double.infinity, 260),
-      end: Size(
-        double.infinity,
-        320,
-      ),
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.fastOutSlowIn,
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-
-    super.dispose();
-    _controller.dispose(); //todo 6
-  }
+  // @override
+  // void dispose() {
+  //   super.dispose();
+  //   _controller.dispose();
+  // }
 
   void _showErrorDialog(String message) {
     showDialog(
@@ -165,44 +165,47 @@ class _AuthCardState extends State<AuthCard> with SingleTickerProviderStateMixin
       _isLoading = true;
     });
 
-
-    try{
+    try {
       if (_authMode == AuthMode.Login) {
         // Log user in
-        await Provider.of<AuthProvider>(context,listen: false,).login(
-          _authData['email']??'',
-          _authData['password']??'',
+        await Provider.of<AuthProvider>(
+          context,
+          listen: false,
+        ).login(
+          _authData['email'] ?? '',
+          _authData['password'] ?? '',
         );
       } else {
         // Sign user up
-        await Provider.of<AuthProvider>(context,listen: false,).signup(
-          _authData['email']??'',
-          _authData['password']??'',
+        await Provider.of<AuthProvider>(
+          context,
+          listen: false,
+        ).signup(
+          _authData['email'] ?? '',
+          _authData['password'] ?? '',
         );
       }
-    }on HttpException catch(error){
+    } on HttpException catch (error) {
       var errorMessage = 'Authentication failed';
 
-      if(error.toString().contains('EMAIL_EXISTS')){
+      if (error.toString().contains('EMAIL_EXISTS')) {
         errorMessage = 'This email address is already in use.';
-      }else if(error.toString().contains('INVALID_EMAIL')){
+      } else if (error.toString().contains('INVALID_EMAIL')) {
         errorMessage = 'This is not a valid email address';
-      }else if(error.toString().contains('WEAK_PASSWORD')){
+      } else if (error.toString().contains('WEAK_PASSWORD')) {
         errorMessage = 'This password is too weak';
-      }else if(error.toString().contains('EMAIL_NOT_FOUND')){
+      } else if (error.toString().contains('EMAIL_NOT_FOUND')) {
         errorMessage = 'Could not find a user with that email.';
-      }else if(error.toString().contains('INVALID_PASSWORD')){
+      } else if (error.toString().contains('INVALID_PASSWORD')) {
         errorMessage = 'Invalid password';
       }
 
       _showErrorDialog(errorMessage);
-
-    }catch(error){
+    } catch (error) {
       var errorMessage = 'Could not authenticate you. Please try again later.';
       print(error);
       _showErrorDialog(errorMessage);
     }
-
 
     setState(() {
       _isLoading = false;
@@ -214,13 +217,13 @@ class _AuthCardState extends State<AuthCard> with SingleTickerProviderStateMixin
       setState(() {
         _authMode = AuthMode.Signup;
       });
-      _controller.forward(); //start animation
+      // _controller.forward(); //start animation
     } else {
       setState(() {
         _authMode = AuthMode.Login;
       });
-      _controller.reverse(); //stop animation
-     }
+      // _controller.reverse(); //stop animation
+    }
   }
 
   @override
@@ -231,16 +234,14 @@ class _AuthCardState extends State<AuthCard> with SingleTickerProviderStateMixin
         borderRadius: BorderRadius.circular(10.0),
       ),
       elevation: 8.0,
-      child: AnimatedBuilder( //todo 7
-        animation: _heightAnimation, //todo 8
-        builder: (ctx, ch) => Container(
-          height: _heightAnimation.value.height,
-          constraints: BoxConstraints(minHeight: _heightAnimation.value.height),
-          width: deviceSize.width * 0.75,
-          padding: EdgeInsets.all(16.0),
-          child: ch, //todo 9
-        ),
-        child: Form( //todo 10 (finish)
+      child: AnimatedContainer( //todo 1
+        duration: Duration(milliseconds: 300), //todo 2
+        curve: Curves.easeIn, //todo 3 (finish)
+        height: _authMode == AuthMode.Signup ? 320 : 260,
+        constraints: BoxConstraints(minHeight: _authMode == AuthMode.Signup ? 320 : 260),
+        width: deviceSize.width * 0.75,
+        padding: EdgeInsets.all(16.0),
+        child: Form(
           key: _formKey,
           child: SingleChildScrollView(
             child: Column(

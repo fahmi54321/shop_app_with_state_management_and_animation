@@ -94,7 +94,7 @@ class AuthCard extends StatefulWidget {
   _AuthCardState createState() => _AuthCardState();
 }
 
-class _AuthCardState extends State<AuthCard> {
+class _AuthCardState extends State<AuthCard> with SingleTickerProviderStateMixin {
   final GlobalKey<FormState> _formKey = GlobalKey();
   AuthMode _authMode = AuthMode.Login;
   Map<String, String> _authData = {
@@ -104,6 +104,39 @@ class _AuthCardState extends State<AuthCard> {
   var _isLoading = false;
   final _passwordController = TextEditingController();
 
+  //animation //todo 1
+  late AnimationController _controller; //todo 2
+  late Animation<Size> _heightAnimation; //todo 3
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController( //todo 4
+      vsync: this,
+      duration: Duration(milliseconds: 300),
+    );
+
+    _heightAnimation = Tween<Size>( //todo 5
+      begin: Size(double.infinity, 260),
+      end: Size(
+        double.infinity,
+        320,
+      ),
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.fastOutSlowIn,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+
+    super.dispose();
+    _controller.dispose(); //todo 6
+  }
 
   void _showErrorDialog(String message) {
     showDialog(
@@ -133,7 +166,6 @@ class _AuthCardState extends State<AuthCard> {
     });
 
 
-    //todo 2
     try{
       if (_authMode == AuthMode.Login) {
         // Log user in
@@ -148,7 +180,7 @@ class _AuthCardState extends State<AuthCard> {
           _authData['password']??'',
         );
       }
-    }on HttpException catch(error){ //todo 3
+    }on HttpException catch(error){
       var errorMessage = 'Authentication failed';
 
       if(error.toString().contains('EMAIL_EXISTS')){
@@ -165,7 +197,7 @@ class _AuthCardState extends State<AuthCard> {
 
       _showErrorDialog(errorMessage);
 
-    }catch(error){ //todo 4 (finish)
+    }catch(error){
       var errorMessage = 'Could not authenticate you. Please try again later.';
       print(error);
       _showErrorDialog(errorMessage);
@@ -182,11 +214,13 @@ class _AuthCardState extends State<AuthCard> {
       setState(() {
         _authMode = AuthMode.Signup;
       });
+      _controller.forward(); //start animation
     } else {
       setState(() {
         _authMode = AuthMode.Login;
       });
-    }
+      _controller.reverse(); //stop animation
+     }
   }
 
   @override
@@ -197,13 +231,16 @@ class _AuthCardState extends State<AuthCard> {
         borderRadius: BorderRadius.circular(10.0),
       ),
       elevation: 8.0,
-      child: Container(
-        height: _authMode == AuthMode.Signup ? 320 : 260,
-        constraints:
-            BoxConstraints(minHeight: _authMode == AuthMode.Signup ? 320 : 260),
-        width: deviceSize.width * 0.75,
-        padding: EdgeInsets.all(16.0),
-        child: Form(
+      child: AnimatedBuilder( //todo 7
+        animation: _heightAnimation, //todo 8
+        builder: (ctx, ch) => Container(
+          height: _heightAnimation.value.height,
+          constraints: BoxConstraints(minHeight: _heightAnimation.value.height),
+          width: deviceSize.width * 0.75,
+          padding: EdgeInsets.all(16.0),
+          child: ch, //todo 9
+        ),
+        child: Form( //todo 10 (finish)
           key: _formKey,
           child: SingleChildScrollView(
             child: Column(
@@ -215,7 +252,6 @@ class _AuthCardState extends State<AuthCard> {
                     if (value!.isEmpty || !value.contains('@')) {
                       return 'Invalid email!';
                     }
-                    return null;
                     return null;
                   },
                   onSaved: (value) {

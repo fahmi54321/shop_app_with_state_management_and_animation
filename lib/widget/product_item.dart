@@ -17,7 +17,7 @@ class _ProductItemState extends State<ProductItem> {
   Widget build(BuildContext context) {
     final product = Provider.of<Product>(context, listen: false);
     final cart = Provider.of<CartProvider>(context, listen: false);
-    final auth = Provider.of<AuthProvider>(context,listen: false); //todo 3
+    final auth = Provider.of<AuthProvider>(context, listen: false); //todo 3
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(
@@ -31,8 +31,11 @@ class _ProductItemState extends State<ProductItem> {
               arguments: product.id,
             );
           },
-          child: Image.network(
-            product.imageUrl,
+          child: FadeInImage( //todo 1 (finish)
+            placeholder: AssetImage('assets/images/product-placeholder.png'),
+            image: NetworkImage(
+              product.imageUrl,
+            ),
             fit: BoxFit.fill,
           ),
         ),
@@ -50,7 +53,8 @@ class _ProductItemState extends State<ProductItem> {
             ),
             onPressed: () {
               setState(() {
-                product.toggleFavoriteStatus(auth.token??'',auth.userId); //todo 4 (next auth_provider)
+                product.toggleFavoriteStatus(auth.token ?? '',
+                    auth.userId); //todo 4 (next auth_provider)
               });
             },
             color: Theme.of(context).accentColor,
